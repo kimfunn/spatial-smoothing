@@ -17,7 +17,7 @@ import ops.meters as meters
 @torch.no_grad()
 def test(model, n_ff, dataset,
          cutoffs=(0.0, 0.9), bins=np.linspace(0.0, 1.0, 11), verbose=False, period=10, gpu=True):
-    model.eval()
+    model.eval() #이벨류에이션으로 변경을 해준 후 트레이닝
     model = model.cuda() if gpu else model.cpu()
     xs, ys = next(iter(dataset))
     xs = xs.cuda() if gpu else xs.cpu()
@@ -35,13 +35,13 @@ def test(model, n_ff, dataset,
     count_bin, acc_bin, conf_bin, metrics_str = [], [], [], []
     metrics = None
 
-    for step, (xs, ys) in enumerate(dataset):
+    for step, (xs, ys) in enumerate(dataset): #데이터셋을 씌우고 
         if gpu:
             xs = xs.cuda()
             ys = ys.cuda()
 
         # A. Predict results
-        ys_pred = torch.stack([F.softmax(model(xs), dim=1) for _ in range(n_ff)])
+        ys_pred = torch.stack([F.softmax(model(xs), dim=1) for _ in range(n_ff)]) #앙상블(소프트맥스)
         ys_pred = torch.mean(ys_pred, dim=0)
 
         ys = ys.cpu()
@@ -63,6 +63,7 @@ def test(model, n_ff, dataset,
             condition = np.logical_and(confidence >= start, confidence < end)
             conf_acc_bin[i] = conf_acc_bin[i] + np.sum(confidence[condition])
 
+         ### 서로 다른 10개의 테스트 ###
         nll_value = nll_meter.avg
         topk_value = topk_meter.avg
         brier_value = brier_meter.avg

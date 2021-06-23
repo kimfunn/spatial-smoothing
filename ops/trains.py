@@ -49,7 +49,7 @@ def train(model, optimizer,
     if warmup_epochs > 0:
         print("The model is warmed up: %.2f sec" % (time.time() - warmup_time))
 
-    for epoch in range(epochs):
+    for epoch in range(epochs): """ 본 에폭"""
         batch_time = time.time()
         *train_metrics, = train_epoch(optimizer, model, dataset_train,
                                              gpu=gpu)
@@ -78,9 +78,9 @@ def train(model, optimizer,
 
 
 def train_epoch(optimizer, model, dataset,
-                scheduler=None, gpu=True):
+                scheduler=None, gpu=True): """메소드를 나눠놓음 , 모듈화를ㄹ 시켜줌"""
     model.train()
-    nll_function = nn.CrossEntropyLoss()
+    nll_function = nn.CrossEntropyLoss() 
     nll_function = nll_function.cuda() if gpu else nll_function
 
     loss_meter = meters.AverageMeter("loss")
@@ -89,12 +89,12 @@ def train_epoch(optimizer, model, dataset,
     l2_meter = meters.AverageMeter("l2")
 
     for step, (xs, ys) in enumerate(dataset):
-        if gpu:
-            xs = xs.cuda()
+        if gpu: 
+            xs = xs.cuda() #데이터를   cuda로 옮겨서 gpu
             ys = ys.cuda()
 
         optimizer.zero_grad()
-        logits = model(xs)
+        logits = model(xs) #배치 
         loss = nll_function(logits, ys)
         nll_meter.update(loss.item())
 
@@ -102,7 +102,7 @@ def train_epoch(optimizer, model, dataset,
         loss.backward()
         optimizer.step()
 
-        if scheduler:
+        if scheduler: #스케줄러있으면 변동
             scheduler.step()
 
     l1_reg = norm.l1(model, gpu)
